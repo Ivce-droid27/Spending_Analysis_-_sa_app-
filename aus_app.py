@@ -2,7 +2,8 @@
 from flask import Flask, request, jsonify
 from con_sqlalchemy import db
 from user_info import User_info
-from user_spent import Total
+from user_spent import Total, Average_spending_age
+from sqlalchemy import func
 
 # Create the Flask app instance
 aus_app = Flask(__name__)
@@ -32,23 +33,59 @@ def get_users_info_s():
     return jsonify([user_info.to_dict() for user_info in users_ifons])
 
 
-# # 2. Calculate Average Spending by Age Ranges
-# @aus_app.route('/average_spending_by_age', methods=['GET'])
+# 2. Calculate Average Spending by Age Ranges
+@aus_app.route('/average_spending_by_age', methods=['GET'])
+def get_average_spending_age():
+    # Define specific age ranges as requested
+    age_range = [(18,24), (25,30), (31,36), (37,47), (48,100)]
+    # Store the results
+    results = []
+
+    for age_min, age_max in age_range:
+        # Get the users within the age range
+        users_in_range = User_info.query.filter(User_info.age.between(age_min, age_max)).all()
+
+        if users_in_range :
+            # Get the total spending for the users within this age range
+            total_spent_in_range = db.session.query(func.sum(Total.total_spent)).join(Total).filter(
+                Total.user_id.in_([user.id for user in users_in_range ])
+            ).scalar() or 0
+
+            # Calculate the average spending in this age range
+            average_spending = total_spent_in_range / len(users_in_range) if users_in_range else 0
+        else:
+            average_spending = 0
+
+        # Append the result for this age range
+        results.append({
+            'age_range': f'{age_min}-{age_max}' if age_max != 100 else f'{age_min}+',
+            'average_spending': round(average_spending, 2)
+        })
+
+    return jsonify(results)
 
 
 # 1. Retrieve Total Spending by User
 @aus_app.route('/total_spent/<int:user_id>', methods=['GET'])
-def get_total_spent_by_user(id):
-    total_spent = Total.query.get_or_404(id)
+def get_total_spent_by_user(user_id):
+    # Retrieve the total spending record for the specified user
+    total_spent = Total.query.filter_by(user_id=user_id).first()
+
+    # If no total is found for the user, return a 404 response
+    if total_spent is None:
+        return jsonify({'message': 'Total spending not found for this user'}), 404
+
+    # Retrieve user info from the 'User_info' table
     user_info = User_info.query.get_or_404(total_spent.user_id)
-    total_spent_dict = total_spent.to_dict()
-    user_info_dict = {
+
+    # Create a dictionary with user information and their total spending
+    result = {
         'name': user_info.name,
         'email': user_info.email,
         'age': user_info.age
     }
-    total_spent_dict['user_info'] = user_info_dict
-    return jsonify(total_spent_dict)
+    # Return the JSON response
+    return jsonify(result)
 
 
 @aus_app.route('/users_info/<int:id>', methods=['GET'])
@@ -85,18 +122,26 @@ def update_totals_s(id):
     return jsonify(total.to_dict())
 
 
-@aus_app.route('/user_info/<int:id>', methods=['PUT'])
-def update_user(id):
+@aus_app.route('/user_info/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
     data = request.get_json()
-    user = User_info.query.get_or_404(id)
+    user = User_info.query.get_or_404(user_id)
     user.name = data.get('name', user.name)
     user.email = data.get('email', user.email)
     user.age = data.get('age', user.age)
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify(user.to_dict()), 200
 
 
-#
+@aus_app.route('/average_spending_by_age/<int:id>', methods=['PUT'])
+def update_average(id):
+    data = request.get_json()
+    average = Average_spending_age.query.get_or_404(id)
+    average.average_spent = data.get('average_spent', average.average_spent)
+    db.session.commit()
+    return jsonify(average.to_dict()), 200
+
+
 @aus_app.route('/total_spent/<int:id>', methods=["DELETE"])
 def delete_totals_s(id):
     total = Total.query.get_or_404(id)
@@ -111,6 +156,13 @@ def delete_users_info(id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message':'Users info deleted'})
+
+@aus_app.route('/average_spending_by_age/<int:id>', methods=["DELETE"])
+def delete_average_s_a(id):
+    average = Average_spending_age.query.get_or_404(id)
+    db.session.delete(average)
+    db.session.commit()
+    return jsonify({'message':'Average info deleted'})
 
 
 if __name__ == "__main__":
