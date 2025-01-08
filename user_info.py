@@ -3,17 +3,17 @@ from con_sqlalchemy import db
 class User_info(db.Model):
     __tablename__ = "users_info"
 
-    user_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True) # smeneto e od user_id vo id
     name = db.Column(db.String(20), nullable=False)
-    pay_check = db.Column(db.Float, nullable=False)
     email = db.Column(db.String(65), nullable=False)
     age = db.Column(db.Integer, nullable=False)
+    pay_check = db.Column(db.Integer, nullable=False, default=0) # premeste no e na posledno mestp
 
     def to_dict(self):
         return {
-            'user_id': self.user_id,
+            'user_id': self.id,
             'name': self.name,
-            'p_check': self.pay_check,
             'email': self.email,
-            'age': self.age
+            'age': self.age,
+            'pay_check': self.pay_check
         }
