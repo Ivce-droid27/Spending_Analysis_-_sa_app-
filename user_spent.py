@@ -5,7 +5,7 @@ class Total(db.Model):
 
     id = db.Column(db.Integer, primary_key=True) # , autoincrement=True - slucajno ako treba
     user_id = db.Column(db.Integer,  db.ForeignKey('users_info.id'), nullable=False)
-    name = db.Column(db.String(20),  db.ForeignKey('users_info.name'), nullable=False)
+    name = db.Column(db.String(20), nullable=False)
     total_spent = db.Column(db.Float, nullable=False)
     year = db.Column(db.Integer, nullable=False)
 
@@ -24,9 +24,9 @@ class Average_spending_age(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users_info.id'), nullable=False)
-    name = db.Column(db.String(20), db.ForeignKey('users_info.id'), nullable=False)
-    age = db.Column(db.Integer, db.ForeignKey('users_info.id'), nullable=False)
-    pay_check = db.Column(db.Integer, db.ForeignKey('users_info.id'), nullable=False, default=0)
+    name = db.Column(db.String(20), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    pay_check = db.Column(db.Integer, nullable=False, default=0)
     total_spent = db.Column(db.Float, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     average_spent = db.Column(db.Float, nullable=False)
