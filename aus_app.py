@@ -1,8 +1,7 @@
 ## aus_app - is Application for User Spending Analysis App
 from flask import Flask, request, jsonify
 from con_sqlalchemy import db
-from user_info import User_info
-from user_spent import Total, Average_spending_age
+from models import User_info, Total
 from sqlalchemy import func
 import requests
 
@@ -125,16 +124,11 @@ def get_user_info(id):
     return jsonify(user.to_dict())
 
 
-@aus_app.route('/average_spending_by_age/<int:id>', methods=['GET'])
-def get_average_spending_id(id):
-    average = Average_spending_age.get_average_spending_by_age.query.get_or_404(id)
-    return jsonify(average.to_dict())
-
-
 @aus_app.route('/total_spent', methods=['POST'])
 def create_totals_s():
     data = request.get_json()
-    new_total = Total(total_spent=data['total_spent'], user_id=data['user_id'], name=data['name'], year=data['year'])
+    # new_total = Total(total_spent=data['total_spent'], user_id=data['user_id'], name=data['name'], year=data['year'])
+    new_total = Total(total_spent=data['total_spent'], user_id=data['user_id'], year=data['year'])
     db.session.add(new_total)
     db.session.commit()
     return jsonify(new_total.to_dict()), 201
@@ -149,35 +143,12 @@ def create_user_i():
     return jsonify(new_user.to_dict()), 201
 
 
-@aus_app.route('/average_spending_by_age', methods=['POST'])
-def create_average_spending():
-    data = request.get_json()
-
-    for user_data in data:
-        # Calculate the average spending or any other necessary field
-        # Here, we assume you want to calculate total_spent based on user pay_check or some logic.
-        total_spent = user_data.get('pay_check', 0)  # Example logic for total_spent
-
-        # Creating the Average_spending_age object with the calculated total_spent
-        new_average = Average_spending_age(
-            user_id=user_data['user_id'],
-            name=user_data['name'],
-            age=user_data['age'],
-            pay_check=user_data['pay_check'],
-            total_spent=total_spent,  # Using the calculated or fetched total_spent
-            average_spent=total_spent / 12,  # Example logic for average_spent (e.g., monthly average)
-            year=2025  # Add the current year or any logic here
-        )
-        db.session.add(new_average)
-        db.session.commit()
-        return jsonify(new_average.to_dict())
-
 @aus_app.route('/total_spent/<int:id>', methods=['PUT'])
 def update_totals_s(id):
     data = request.get_json()
     total = Total.query.get_or_404(id)
     total.user_id = data.get('user_id', total.user_id)
-    total.name = data.get('name', total.name)
+    # total.user_name = data.get('user_name', total.user_name)
     total.total_spent = data.get('total_spent', total.total_spent)
     total.year = data.get('year', total.year)
     db.session.commit()
@@ -195,21 +166,6 @@ def update_user(user_id):
     return jsonify(user.to_dict()), 200
 
 
-@aus_app.route('/average_spending_by_age/<int:id>', methods=['PUT'])
-def update_average(id):
-    data = request.get_json()
-    average = Average_spending_age.query.get_or_404(id)
-    average.average_spent = data.get('average_spent', average.average_spent)
-    average.user_id = data.get('user_id', average.user_id)
-    average.name = data.get('name', average.name)
-    average.age = data.get('age', average.age)
-    average.pay_check = data.get('pay_check', average.pay_check)
-    average.total_spent = data.get('total_spent', average.total_spent)
-    average.year = data.get('year', average.year)
-    db.session.commit()
-    return jsonify(average.to_dict()), 200
-
-
 @aus_app.route('/total_spent/<int:id>', methods=["DELETE"])
 def delete_totals_s(id):
     total = Total.query.get_or_404(id)
@@ -224,14 +180,6 @@ def delete_users_info(id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message':'Users info deleted'})
-
-
-@aus_app.route('/average_spending_by_age/<int:id>', methods=["DELETE"])
-def delete_average_s_a(id):
-    average = Average_spending_age.query.get_or_404(id)
-    db.session.delete(average)
-    db.session.commit()
-    return jsonify({'message':'Average info deleted'})
 
 
 if __name__ == "__main__":
