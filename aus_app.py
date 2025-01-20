@@ -1,9 +1,10 @@
 ## aus_app - is Application for User Spending Analysis App
 from flask import Flask, request, jsonify
-from con_sqlalchemy import db
+from con_sqlalchemy import db, test_code_collection
 from models import User_info, Total
 from sqlalchemy import func
 import requests
+from werkzeug.exceptions import BadRequest
 
 # Create the Flask app instance
 aus_app = Flask(__name__)
@@ -23,6 +24,7 @@ db.init_app(aus_app)
 # Ensure app context when interacting with the database
 with aus_app.app_context():
     db.create_all()
+    ## Posle da go izbrisam ova ako funkcionira sve kako sto treba
     print("Database and tables created")
 
 def send_to_telegram(message, chat_id):
@@ -32,6 +34,10 @@ def send_to_telegram(message, chat_id):
         'text': message
     }
     requests.post(url, data=payload)
+
+
+SPENDING_THRESHOLD = 1000
+
 
 @aus_app.route('/total_spent', methods=['GET'])
 def get_total_spending():
@@ -98,24 +104,24 @@ def get_average_spending_by_age():
 # 1. Retrieve Total Spending by User
 @aus_app.route('/total_spent/<int:id>', methods=['GET'])
 def get_total_spent_by_user(id):
-    # total_spent = Total.query.get_or_404(id)
     #  Retrieves the total spending for a specific user based on their user ID.
     total_spent = Total.query.filter_by(user_id=id).first()
 
     if total_spent is None:
         return jsonify({'message': 'Total spending not found for this user'}), 404
     # user_id (integer): The unique user ID for the user.
-    user_info = User_info.query.get_or_404(total_spent.user_id)
+    user_info = User_info.query.get_or_404(total_spent.user_id.id)
     result = {
-        'name': user_info.nam,
-        'email': user_info.email,
-        'age': user_info.age,
-        'pay_check': user_info.pay_check,
-        'total_spent': total_spent.total_spent,
-        'year': total_spent.year
+    'name': user_info.name,
+    'email': user_info.email,
+    'age': user_info.age,
+    'pay_check': user_info.pay_check,
+    'total_spent': total_spent.total_spent,
+    'year': total_spent.year
     }
     # JSON object containing the user ID and total spending.
-    return jsonify(result)
+    return jsonify(result, user_info.name)
+
 
 
 @aus_app.route('/users_info/<int:id>', methods=['GET'])
@@ -127,7 +133,6 @@ def get_user_info(id):
 @aus_app.route('/total_spent', methods=['POST'])
 def create_totals_s():
     data = request.get_json()
-    # new_total = Total(total_spent=data['total_spent'], user_id=data['user_id'], name=data['name'], year=data['year'])
     new_total = Total(total_spent=data['total_spent'], user_id=data['user_id'], year=data['year'])
     db.session.add(new_total)
     db.session.commit()
@@ -143,12 +148,51 @@ def create_user_i():
     return jsonify(new_user.to_dict()), 201
 
 
+## Treba da se sredi za da funkcionira kako sto treba deka dava vo postman error 405
+@aus_app.route('/write_to_mongodb', methods=['POST'])
+def write_to_mongodb():
+    try:
+        # Retrieve JSON data from request
+        user_data = request.get_json()
+
+        # Validate the required fields
+        if 'user_id' not in user_data or 'total_spending' not in user_data:
+            return jsonify({'error': 'Missing user_id or total_spending'}), 400
+
+        user_id = user_data['user_id']
+        total_spending = user_data['total_spending']
+
+        # Check if the spending exceeds the threshold
+        if total_spending <= SPENDING_THRESHOLD:
+            return jsonify({'error': 'Total spending is below the required threshold'}), 400
+
+        # Prepare data to insert into MongoDB
+        user_data_to_insert = {
+            'user_id': user_id,
+            'total_spending': total_spending
+        }
+
+        # Insert data into MongoDB collection
+        test_code_collection.insert_one(user_data_to_insert)
+
+        # Return a success response
+        return jsonify({'message': 'Successfully inserted into MongoDB collection.'}), 201
+
+    except BadRequest as e:
+        # Handle specific HTTPExceptions like BadRequest (400)
+        return jsonify({'error': str(e.description)}), 400
+
+
+    except Exception as e:
+        # Handle other general exceptions
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
 @aus_app.route('/total_spent/<int:id>', methods=['PUT'])
 def update_totals_s(id):
     data = request.get_json()
     total = Total.query.get_or_404(id)
     total.user_id = data.get('user_id', total.user_id)
-    # total.user_name = data.get('user_name', total.user_name)
     total.total_spent = data.get('total_spent', total.total_spent)
     total.year = data.get('year', total.year)
     db.session.commit()
