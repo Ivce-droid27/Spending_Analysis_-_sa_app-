@@ -22,9 +22,8 @@ class User_info(db.Model):
 class Total(db.Model):
     __tablename__ = "total_spent"
 
-    id = db.Column(db.Integer, primary_key=True) # , autoincrement=True - slucajno ako treba
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer,  db.ForeignKey('users_info.id'), nullable=False)
-    # user_name = db.Column(db.String(20), db.ForeignKey('users_info.name'), nullable=False)
     total_spent = db.Column(db.Float, nullable=False)
     year = db.Column(db.Integer, nullable=False)
 
@@ -32,7 +31,6 @@ class Total(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            # 'name': self.user_name,
             'total_spent': self.total_spent,
             'year': self.year
         }
