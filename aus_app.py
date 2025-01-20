@@ -154,9 +154,6 @@ def write_to_mongodb():
         # Get JSON data from the POST request
         data = request.get_json()
 
-        # user_id = data['user_id']
-        # total_spent = data['total_spent']
-
         # Validate the input data (check if required fields are present)
         if 'user_id' not in data or 'total_spent' not in data:
             return jsonify({'error': 'Missing user_id or total_spent in request data'}), 400
