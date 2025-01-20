@@ -148,43 +148,47 @@ def create_user_i():
     return jsonify(new_user.to_dict()), 201
 
 
-## Treba da se sredi za da funkcionira kako sto treba deka dava vo postman error 405
 @aus_app.route('/write_to_mongodb', methods=['POST'])
 def write_to_mongodb():
     try:
-        # Retrieve JSON data from request
-        user_data = request.get_json()
+        # Get JSON data from the POST request
+        data = request.get_json()
 
-        # Validate the required fields
-        if 'user_id' not in user_data or 'total_spending' not in user_data:
-            return jsonify({'error': 'Missing user_id or total_spending'}), 400
+        # user_id = data['user_id']
+        # total_spent = data['total_spent']
 
-        user_id = user_data['user_id']
-        total_spending = user_data['total_spending']
+        # Validate the input data (check if required fields are present)
+        if 'user_id' not in data or 'total_spent' not in data:
+            return jsonify({'error': 'Missing user_id or total_spent in request data'}), 400
 
-        # Check if the spending exceeds the threshold
-        if total_spending <= SPENDING_THRESHOLD:
-            return jsonify({'error': 'Total spending is below the required threshold'}), 400
+        user_id = data['user_id']
+        total_spent = data['total_spent']
 
-        # Prepare data to insert into MongoDB
-        user_data_to_insert = {
+        # Check if total_spending exceeds the threshold (e.g., 1000)
+        if total_spent <= 1000:
+            return jsonify({'error': 'Total spending must exceed 1000'}), 400
+
+        # Prepare the data for MongoDB
+        user_data = {
             'user_id': user_id,
-            'total_spending': total_spending
+            'total_spending': total_spent
         }
 
         # Insert data into MongoDB collection
-        test_code_collection.insert_one(user_data_to_insert)
+        result = test_code_collection.insert_one(user_data)
 
-        # Return a success response
-        return jsonify({'message': 'Successfully inserted into MongoDB collection.'}), 201
-
-    except BadRequest as e:
-        # Handle specific HTTPExceptions like BadRequest (400)
-        return jsonify({'error': str(e.description)}), 400
-
+        # Respond with success message and status code 201 Created
+        return jsonify({
+            'message': 'User data successfully inserted into MongoDB',
+            'data': {
+                'user_id': user_id,
+                'total_spend': total_spent,
+                'mongo_id': str(result.inserted_id)  # Ensure the ObjectId is converted to string
+            }
+        }), 201
 
     except Exception as e:
-        # Handle other general exceptions
+        # Handle unexpected errors
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
