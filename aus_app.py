@@ -38,7 +38,7 @@ def get_average_spending_by_age():
         func.avg(Total.money_spent).label('average_spent'),
         User_info.age
     ).join(
-        User_info, Total.user_id == User_info.id
+        User_info, Total.user_id == User_info.user_id
     ).group_by(
         User_info.age
     ).all()
