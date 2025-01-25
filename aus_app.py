@@ -132,39 +132,29 @@ def write_to_mongodb():
         if total_spent <= 1000:
             return jsonify({'error': 'Total spending must exceed 1000'}), 400
 
-        # Check if the user already exists in the database
-        existing_user = test_code_collection.find_one({'user_id': user_id})
+        # Prepare the data for MongoDB
+        user_data = {
+            'user_id': user_id,
+            'total_spending': total_spent
+        }
 
-        if existing_user:
-            # If user exists and exceeds spending threshold, update the record
-            result = test_code_collection.update_one(
-                {'user_id': user_id},
-                {'$set': {'total_spending': total_spent}}
-            )
-            message = "User data successfully updated in MongoDB"
-        else:
-            # If user doesn't exist, insert new user data
-            user_data = {
-                'user_id': user_id,
-                'total_spending': total_spent
-            }
-            result = test_code_collection.insert_one(user_data)
-            message = "User data successfully inserted into MongoDB"
+        # Insert data into MongoDB collection
+        result = test_code_collection.insert_one(user_data)
 
         # Respond with success message and status code 201 Created
         return jsonify({
-            'message': message,
+            'message': 'User data successfully inserted into MongoDB',
             'data': {
                 'user_id': user_id,
-                'total_spent': total_spent,
-                'mongo_id': str(result.inserted_id) if result.acknowledged else str(existing_user['_id'])
-                # ObjectId as string
+                'total_spend': total_spent,
+                'mongo_id': str(result.inserted_id)  # Ensure the ObjectId is converted to string
             }
         }), 201
 
     except Exception as e:
         # Handle unexpected errors
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
 
 
 @aus_app.route('/total_spent/<int:id>', methods=['PUT'])
