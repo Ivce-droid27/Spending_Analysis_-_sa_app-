@@ -115,6 +115,7 @@ def create_user_i():
     return jsonify(new_user.to_dict()), 201
 
 
+# 2. Write user data to MongoDB
 @aus_app.route('/write_to_mongodb', methods=['POST'])
 def write_to_mongodb():
     try:
