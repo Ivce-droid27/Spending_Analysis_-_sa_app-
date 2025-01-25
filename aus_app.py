@@ -35,13 +35,9 @@ def get_users_info_s():
 def get_average_spending_by_age():
     # Join the 'Total' and 'User_info' tables
     results = db.session.query(
-        func.avg(Total.money_spent).label('average_spent'),
-        User_info.age
-    ).join(
-        User_info, Total.user_id == User_info.user_id
-    ).group_by(
-        User_info.age
-    ).all()
+        func.avg(Total.money_spent).label('average_spent'),User_info.age).join(
+        User_info, Total.user_id == User_info.user_id).group_by(User_info.age).all()
+
     # # Define age ranges
     age_ranges = {
         "18-24": [],
@@ -50,6 +46,7 @@ def get_average_spending_by_age():
         "37-47": [],
         ">47": []
     }
+
     # Classify data into age ranges
     for result in results:
         average_spent = result.average_spent
@@ -70,7 +67,6 @@ def get_average_spending_by_age():
     averages = {age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()}
 
     return jsonify(averages)
-
 
 
 # 1. Retrieve Total Spending by User
@@ -136,22 +132,33 @@ def write_to_mongodb():
         if total_spent <= 1000:
             return jsonify({'error': 'Total spending must exceed 1000'}), 400
 
-        # Prepare the data for MongoDB
-        user_data = {
-            'user_id': user_id,
-            'total_spending': total_spent
-        }
+        # Check if the user already exists in the database
+        existing_user = test_code_collection.find_one({'user_id': user_id})
 
-        # Insert data into MongoDB collection
-        result = test_code_collection.insert_one(user_data)
+        if existing_user:
+            # If user exists and exceeds spending threshold, update the record
+            result = test_code_collection.update_one(
+                {'user_id': user_id},
+                {'$set': {'total_spending': total_spent}}
+            )
+            message = "User data successfully updated in MongoDB"
+        else:
+            # If user doesn't exist, insert new user data
+            user_data = {
+                'user_id': user_id,
+                'total_spending': total_spent
+            }
+            result = test_code_collection.insert_one(user_data)
+            message = "User data successfully inserted into MongoDB"
 
         # Respond with success message and status code 201 Created
         return jsonify({
-            'message': 'User data successfully inserted into MongoDB',
+            'message': message,
             'data': {
                 'user_id': user_id,
-                'total_spend': total_spent,
-                'mongo_id': str(result.inserted_id)  # Ensure the ObjectId is converted to string
+                'total_spent': total_spent,
+                'mongo_id': str(result.inserted_id) if result.acknowledged else str(existing_user['_id'])
+                # ObjectId as string
             }
         }), 201
 
