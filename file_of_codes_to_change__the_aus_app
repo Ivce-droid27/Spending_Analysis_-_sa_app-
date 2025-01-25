@@ -1,0 +1,96 @@
+## THE STANDERT PROJECT REQUEST ##
+    try:
+        # Get JSON data from the POST request
+        data = request.get_json()
+
+        # Validate the input data (check if required fields are present)
+        if 'user_id' not in data or 'total_spent' not in data:
+            return jsonify({'error': 'Missing user_id or total_spent in request data'}), 400
+
+        user_id = data['user_id']
+        total_spent = data['total_spent']
+
+        # Check if total_spending exceeds the threshold (e.g., 1000)
+        if total_spent <= 1000:
+            return jsonify({'error': 'Total spending must exceed 1000'}), 400
+
+        # Prepare the data for MongoDB
+        user_data = {
+            'user_id': user_id,
+            'total_spending': total_spent
+        }
+
+        # Insert data into MongoDB collection
+        result = test_code_collection.insert_one(user_data)
+
+        # Respond with success message and status code 201 Created
+        return jsonify({
+            'message': 'User data successfully inserted into MongoDB',
+            'data': {
+                'user_id': user_id,
+                'total_spend': total_spent,
+                'mongo_id': str(result.inserted_id)  # Ensure the ObjectId is converted to string
+            }
+        }), 201
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
+
+
+
+
+
+
+
+## AUTOMATICALLY puting data in mongodb of users that spent over 1000 ##
+
+@aus_app.route('/write_to_mongodb', methods=['POST'])
+def write_to_mongodb():
+    try:
+        # Query all users from the SQL database (User_info and Total)
+        users = User_info.query.all()  # Get all users from User_info table
+        for user in users:
+            # For each user, calculate the total_spent from the Total table
+            total_spent = db.session.query(func.sum(Total.money_spent)).filter(Total.user_id == user.user_id).scalar()
+
+            # Check if total_spent exceeds the threshold (e.g., 1000)
+            if total_spent and total_spent > 1000:
+                # Prepare the data for MongoDB
+                user_data = {
+                    'user_id': user.user_id,
+                    'total_spending': total_spent,
+                    'user_name': user.name,
+                    'user_email': user.email,
+                    'user_age': user.age
+                }
+
+                # Check if the user already exists in MongoDB
+                existing_user = test_code_collection.find_one({'user_id': user.user_id})
+
+                if existing_user:
+                    # If user exists, check if total_spending is the same
+                    if existing_user.get('total_spending') == total_spent:
+                        print(f"User {user.user_id} already exists with the same spending. Skipping update.")
+                        continue  # Skip this user if total_spending is the same
+                    else:
+                        # If spending is different, update the record in MongoDB
+                        result = test_code_collection.update_one(
+                            {'user_id': user.user_id},
+                            {'$set': {'total_spending': total_spent}}
+                        )
+                        message = f"User {user.user_id} data successfully updated in MongoDB"
+                else:
+                    # If user doesn't exist, insert new user data into MongoDB
+                    result = test_code_collection.insert_one(user_data)
+                    message = f"User {user.user_id} data successfully inserted into MongoDB"
+
+                # Log the result
+                print(message)
+
+        return jsonify({'message': 'MongoDB data update completed'}), 200
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
