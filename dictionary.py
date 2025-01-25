@@ -1,6 +1,8 @@
+## dictionary app
 from typing import Final
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
 
 
 TOKEN: Final = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'
@@ -16,6 +18,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def end_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Good buy and have a nice day Sir/Mam.")
 
+# async def information(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     await update.message.reply_text(f"Here is the information you are looking for {}.")
+
 ## HELP RESPONSES
 def help_responses(text: str):
     processed: str = text.lower()
@@ -24,7 +29,7 @@ def help_responses(text: str):
         return "Hello there!"
 
     if 'can you help me with the voucher?' in processed:
-        return "Yes of course.What is your problem?"
+        return "Yes of course.That's my job.What is do you need?"
 
     if 'how much for to win the voucher?' in processed:
         return "You need to spent 1000 or more to able to win the voucher"
@@ -67,6 +72,7 @@ if __name__ == '__main__':
     ## COMMANDS
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command))
+    # app.add_handler(CommandHandler('information', information))
     app.add_handler(CommandHandler('end', end_command))
 
     ## MESSAGES
