@@ -18,8 +18,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def end_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Good buy and have a nice day Sir/Mam.")
 
-# async def information(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     await update.message.reply_text(f"Here is the information you are looking for {}.")
+
 
 ## HELP RESPONSES
 def help_responses(text: str):
@@ -72,7 +71,6 @@ if __name__ == '__main__':
     ## COMMANDS
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command))
-    # app.add_handler(CommandHandler('information', information))
     app.add_handler(CommandHandler('end', end_command))
 
     ## MESSAGES
