@@ -33,12 +33,11 @@ def get_users_info_s():
 # 2. Calculate Average Spending by Age Ranges
 @aus_app.route('/average_spending_by_age', methods=['GET'])
 def get_average_spending_by_age():
-    # Join the 'Total' and 'User_info' tables
     results = db.session.query(
-        func.avg(Total.money_spent).label('average_spent'),User_info.age).join(
-        User_info, Total.user_id == User_info.user_id).group_by(User_info.age).all()
+        func.avg(Total.money_spent).label('average_spent'), User_info.age
+    ).join(User_info, Total.user_id == User_info.user_id).group_by(User_info.age).all()
 
-    # # Define age ranges
+    # Define age ranges and categorize spending
     age_ranges = {
         "18-24": [],
         "25-30": [],
@@ -47,7 +46,7 @@ def get_average_spending_by_age():
         ">47": []
     }
 
-    # Classify data into age ranges
+    # Assign each result to its respective age range
     for result in results:
         average_spent = result.average_spent
         age = result.age
@@ -63,9 +62,30 @@ def get_average_spending_by_age():
         elif age > 47:
             age_ranges[">47"].append(average_spent)
 
-    # Calculate the average for each age range
-    averages = {age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()}
+    # Calculate the average spending for each age range
+    averages = {
+        age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()
+    }
 
+    # Send data to Telegram bot
+    bot_token = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'
+    chat_id = '8011204510'  # Set your desired chat ID
+
+    message = "Average Spending by Age Range:\n"
+    for age_range, avg in averages.items():
+        message += f"{age_range}: ${avg:.2f}\n"
+
+    telegram_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    params = {
+        'chat_id': chat_id,
+        'text': message,
+        'parse_mode': 'Markdown'
+    }
+
+    # Sending the message
+    requests.get(telegram_url, params=params)
+
+    # Return the averages as a JSON object
     return jsonify(averages)
 
 
