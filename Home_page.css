@@ -1,0 +1,98 @@
+@import url(responsive.css);
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.body {
+    margin: 0; /* Removes any default margin from the body */
+    padding: 0; /* Removes any default padding from the body */
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+.wrapper {
+    width: 100%; /* Full width of the viewport */
+    max-width: 1400px; /* Maximum width for the content */
+    margin: 0 auto; /* Centers the content */
+    padding: 0 20px; /* Adds space to the left and right */
+    box-sizing: border-box; /* Ensures padding is included in the width calculation */
+}
+
+.homepage {
+    width: 100%;
+}
+
+.homepage .header {
+    height: 60px;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    color: black;
+}
+
+/* Style the header to use flexbox for layout */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    background-color: #4CAF50; /* Example background color */
+    border-radius: 20px; /* Rounds the corners */
+    padding: 10px 20px; /* Adds space inside the header */
+    box-sizing: border-box; /* Ensures padding is included in the total width calculation */
+}
+
+.header h2 {
+    position: absolute;
+    left: 16px;
+    margin-left: 10px;
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.header a {
+    color: #dfdbdb;
+    display: flex;
+    padding: 20px;
+    text-decoration: none;
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* Position .header a:nth-child(1) (Home page) */
+.headera:nth-child(1) {
+    padding: 50px;
+    left: -20px;
+}
+
+/* Position .header a:nth-child(2) (Money Spent) */
+.header a:nth-child(2) { 
+    padding: 20px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Position .header a:nth-child(3) (User Info) */
+.headera:nth-child(3) {
+    padding: 50px;
+    left: +20px;
+}
+
+/* Position .Help_botten */
+.Help_botten {
+    position: absolute; /* This will allow it to be positioned relative to the header */
+    right: 16px;  /* This aligns it to the right side of the header */
+    margin-right: 10px;
+}
+
+/* Position .Help_botten */
+.Help_botten a {
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
