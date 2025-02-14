@@ -1,8 +1,10 @@
 ## aus_app - is Application for User Spending Analysis App
 from flask import Flask, request, jsonify
-from con_sqlalchemy import db, test_code_collection
+from con_sqlalchemy import db, voucher_collection
 from models import User_info, Total
 from sqlalchemy import func
+import requests
+
 
 # Create the Flask app instance
 aus_app = Flask(__name__)
@@ -160,7 +162,7 @@ def write_to_mongodb():
         }
 
         # Insert data into MongoDB collection
-        result = test_code_collection.insert_one(user_data)
+        result = voucher_collection.insert_one(user_data)
 
         # Respond with success message and status code 201 Created
         return jsonify({
@@ -177,18 +179,6 @@ def write_to_mongodb():
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
-
-@aus_app.route('/total_spent/<int:id>', methods=['PUT'])
-def update_totals_s(id):
-    data = request.get_json()
-    money = Total.query.get_or_404(id)
-    money.user_id = data.get('user_id', money.user_id)
-    money.money_spent = data.get('total_spent', money.money_spent)
-    money.year = data.get('year', money.year)
-    db.session.commit()
-    return jsonify(money.to_dict()), 200
-
-
 @aus_app.route('/users_info/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     data = request.get_json()
@@ -198,22 +188,6 @@ def update_user(user_id):
     user.age = data.get('age', user.age)
     db.session.commit()
     return jsonify(user.to_dict()), 200
-
-
-@aus_app.route('/total_spent/<int:id>', methods=["DELETE"])
-def delete_totals_s(id):
-    money = Total.query.get_or_404(id)
-    db.session.delete(money)
-    db.session.commit()
-    return jsonify({'message': 'Total spending deleted'})
-
-
-@aus_app.route('/users_info/<int:id>', methods=["DELETE"])
-def delete_users_info(id):
-    user = User_info.query.get_or_404(id)
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify({'message':'Users info deleted'})
 
 
 if __name__ == "__main__":
