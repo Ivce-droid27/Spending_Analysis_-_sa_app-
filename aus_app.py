@@ -28,8 +28,8 @@ def get_money_spending():
 
 @aus_app.route('/users_info', methods=['GET'])
 def get_users_info_s():
-    users_ifons = User_info.query.all()
-    return jsonify([user_info.to_dict() for user_info in users_ifons])
+    users_infos = User_info.query.all()
+    return jsonify([user_info.to_dict() for user_info in users_infos])
 
 
 # 2. Calculate Average Spending by Age Ranges
