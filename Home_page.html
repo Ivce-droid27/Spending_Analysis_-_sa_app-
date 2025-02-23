@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voucher Info</title>
     <link rel="stylesheet" type="text/css" href="Home_page.css">
 </head>
@@ -13,19 +14,19 @@
                      <h2>Get Your Voucher</h2>
 
                      <div>
-                         <a href="#">
+                         <a href="http://127.0.0.1:5000">
                              <span id="Home_page">Home</span>
                          </a>
                      </div>
 
                      <div>
-                         <a href="#">
+                         <a href="http://127.0.0.1:5000/total_spent">
                              <span id="Money_Spent">Money Spent</span>
                          </a>
                      </div>
 
                      <div>
-                         <a href="#">
+                         <a href="http://127.0.0.1:5000/users_info">
                              <span id="User_info">User Info</span>
                          </a>
                      </div>
@@ -40,5 +41,49 @@
              </div>
          </div>
      </div>
+
+    <div>
+        <div class="wrapper2">
+            <div class="text_box">
+
+                <h3>Information for the web-site</h3>
+
+                <div>
+                    <p>Почитувани дами и гопода</p>
+                </div>
+                <div>
+                    <p>Ваа веб страница ве информира за вашите трошоци,
+                        колку сте потрошиле секоја годаина, и ви кажува
+                        кои се најчестите потрошувачи во одредена група
+                        на возрас. Ако поминете некој лимит на
+                        поторшувачка освојувата ваучер.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+   <div>
+       <div class="wrapper3">
+           <div class="table_box">
+
+               <h3>Average spending by age ranges</h3>
+
+               <table>
+                    <tr>
+                        <th>Age Group</th>
+                        <th>Average Consumption</th>
+                    </tr>
+                   {% for age_range, avg in averages.items() %}
+                        <tr>
+                            <td>{{ age_range }}</td>
+                            <td>${{ avg | round(2) }}</td>
+                        </tr>
+                    {% endfor %}
+               </table>
+           </div>
+       </div>
+   </div>
 </body>
 </html>
