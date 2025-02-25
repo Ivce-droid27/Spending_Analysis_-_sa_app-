@@ -1,5 +1,5 @@
 ## aus_app - is Application for User Spending Analysis App
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from con_sqlalchemy import db, voucher_collection
 from models import User_info, Total
 from sqlalchemy import func
@@ -20,15 +20,27 @@ db.init_app(aus_app)
 with aus_app.app_context():
     db.create_all()
 
-# Route for the homepage / # 2. Calculate Average Spending by Age Ranges
-@aus_app.route('/')
-def home():
+@aus_app.route('/total_spent', methods=['GET'])
+def get_money_spending():
+    money_spending = Total.query.all()
+    return jsonify([money.to_dict() for money in money_spending])
+
+
+@aus_app.route('/users_info', methods=['GET'])
+def get_users_info_s():
+    users_infos = User_info.query.all()
+    return jsonify([user_info.to_dict() for user_info in users_infos])
+
+
+# 2. Calculate Average Spending by Age Ranges
+@aus_app.route('/average_spending_by_age', methods=['GET'])
+def get_average_spending_by_age():
     results = db.session.query(
         func.avg(Total.money_spent).label('average_spent'), User_info.age
     ).join(User_info, Total.user_id == User_info.user_id).group_by(User_info.age).all()
 
     # Define age ranges and categorize spending
-    averages = {
+    age_ranges = {
         "18-24": [],
         "25-30": [],
         "31-36": [],
@@ -38,26 +50,28 @@ def home():
 
     # Assign each result to its respective age range
     for result in results:
-        age = result.age
         average_spent = result.average_spent
+        age = result.age
 
         if 18 <= age <= 24:
-            averages["18-24"].append(average_spent)
+            age_ranges["18-24"].append(average_spent)
         elif 25 <= age <= 30:
-            averages["25-30"].append(average_spent)
+            age_ranges["25-30"].append(average_spent)
         elif 31 <= age <= 36:
-            averages["31-36"].append(average_spent)
+            age_ranges["31-36"].append(average_spent)
         elif 37 <= age <= 47:
-            averages["37-47"].append(average_spent)
+            age_ranges["37-47"].append(average_spent)
         elif age > 47:
-            averages[">47"].append(average_spent)
+            age_ranges[">47"].append(average_spent)
 
     # Calculate the average spending for each age range
-    averages = {age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in averages.items()}
+    averages = {
+        age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()
+    }
 
     # Send data to Telegram bot
-    bot_token = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'  # Твојот Telegram бот токен
-    chat_id = '8011204510'  # Твојот Telegram chat ID
+    bot_token = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'
+    chat_id = '8011204510'  # Set your desired chat ID
 
     message = "Average Spending by Age Range:\n"
     for age_range, avg in averages.items():
@@ -69,22 +83,12 @@ def home():
         'text': message,
         'parse_mode': 'Markdown'
     }
+
     # Sending the message
     requests.get(telegram_url, params=params)
 
-    # Врати ја HTML страницата со податоци
-    return render_template('Home_page.html', averages=averages)
-
-@aus_app.route('/total_spent', methods=['GET'])
-def get_money_spending():
-    money_spending = Total.query.all()
-    return jsonify([money.to_dict() for money in money_spending])
-
-
-@aus_app.route('/users_info', methods=['GET'])
-def get_users_info_s():
-    users_infos = User_info.query.all()
-    return jsonify([user_info.to_dict() for user_info in users_infos])
+    # Return the averages as a JSON object
+    return jsonify(averages)
 
 
 # 1. Retrieve Total Spending by User
