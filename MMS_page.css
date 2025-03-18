@@ -1,0 +1,193 @@
+@import url(responsive.css);
+
+/* Reset the margin and padding for all elements */
+* {
+    margin-top: 0;
+    padding: 0;
+}
+
+/* Body styling: set background color and hide horizontal overflow */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    background-color: #dbdbdb; /* Background color for the page */
+}
+
+/* ------------------------- Wrapper for the main content ------------------------- */
+
+/* Wrapper to center content and set maximum width */
+.wrapper_main {
+    width: 100%; /* Full width of the viewport */
+    max-width: 1400px; /* Maximum width for the content */
+    margin: 0 auto; /* Centers the content */
+    padding: 0 20px; /* Adds space to the left and right */
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+}
+
+/* Homepage styling */
+.homepage {
+    width: 100%;
+}
+
+/* ------------------------- Header Styles ------------------------- */
+
+/* Header styling: sets up flex layout for positioning */
+.homepage .header {
+    height: 50px;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    color: black;
+}
+
+/* Header general styling */
+.header {
+    display: flex;
+    justify-content: space-between; /* Space out the header items */
+    align-items: center;
+    width: 100%;
+    position: relative; /* For positioning child elements */
+    background-color: #218e24; /* Green background for the header */
+    border-radius: 20px; /* Rounded corners for the header */
+    padding: 10px 20px; /* Padding inside the header */
+    box-sizing: border-box; /* Include padding in the width */
+}
+
+/* Header text styling */
+.header h2 {
+    position: absolute; /* Position the heading absolutely */
+    left: 16px;
+    margin-left: 10px;
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* Links inside the header */
+.header a {
+    color: #dfdbdb; /* Light gray text for the links */
+    display: flex;
+    padding: 20px;
+    text-decoration: none; /* Remove underline from links */
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* Specific positioning for header links */
+.headera:nth-child(1) {
+    padding: 50px;
+    left: -20px;
+}
+
+.header a:nth-child(2) { 
+    padding: 20px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.headera:nth-child(3) {
+    padding: 50px;
+    left: +20px;
+}
+
+/* Help button positioning */
+.Help_botten {
+    position: absolute; /* Position the help button */
+    right: 16px;  /* Align it to the right side */
+    margin-right: 10px;
+}
+
+/* Help button link styling */
+.Help_botten a {
+    font-size: 25px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.wrapper2 {
+    width: 100%; /* Full width of the viewport */
+    max-width: 1400px; /* Maximum width for the content */
+    margin: 0 auto; /* Centers the content */
+    margin-top: 20px;
+    padding: 0 20px; /* Adds space to the left and right */
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+}
+
+/* Styling for the text box where information about the website will be displayed */
+.text_box {
+    width: 100%;
+    height: 100%;
+    left: 16px;
+    margin-top: 15px;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    border-radius: 20px;
+    box-sizing: border-box;
+    background-color: #218e24; /* Green background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Box shadow around the text box */
+}
+
+/* Heading inside the text box */
+.h3 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;            /* Center the text horizontally */
+    color: #dfdbdb;              /* Light gray color for the heading */
+    display: flex;                 /* Apply flexbox to the h3 */
+    justify-content: center;       /* Center the content horizontally */
+    align-items: center;           /* Center the content vertically */
+    height: 20px;                  /* Optional: Specify a height to allow vertical centering */
+}
+
+/* Heading inside the text box */
+.h5 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;            /* Center the text horizontally */
+    color: #dfdbdb;              /* Light gray color for the heading */
+    display: flex;                 /* Apply flexbox to the h3 */
+    justify-content: center;       /* Center the content horizontally */
+    align-items: center;           /* Center the content vertically */
+    height: 20px;                  /* Optional: Specify a height to allow vertical centering */
+}
+
+/* Set a fixed height for the container */
+.scrollable-table {
+    max-height: 300px;  /* Adjust height as needed */
+    overflow-y: auto;   /* Enable vertical scrolling */
+    border: 1px solid #ccc;  /* Optional, for visual effect */
+}
+
+/* Optional: Style the table to make it more readable */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+td {
+    background-color: #f9f9f9; /* Light grey background for table cells */
+}
+
+
+/* Optional: Add hover effect to table rows for better interactivity */
+tr:hover {
+    background-color: #f1f1f1; /* Slightly darker grey on row hover */
+} 

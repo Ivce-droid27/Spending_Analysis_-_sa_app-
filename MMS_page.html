@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher Info</title>
+    <link rel="stylesheet" type="text/css" href="MMS_page.css">
+</head>
+<body>
+     <div>
+         <div class="wrapper_main">
+             <div class="homepage">
+                 <div class="header">
+                     <h2>Get Your Voucher</h2>
+
+                     <div>
+                         <a href="http://127.0.0.1:5000">
+                             <span id="Home_page">Home</span>
+                         </a>
+                     </div>
+
+                     <div>
+                         <a href="http://127.0.0.1:5000/total_spent">
+                             <span id="Money_Spent">Money Spent</span>
+                         </a>
+                     </div>
+
+                     <div>
+                         <a href="http://127.0.0.1:5000/users_info">
+                             <span id="User_info">User Info</span>
+                         </a>
+                     </div>
+
+                     <div class="Help_botten">
+                         <a href="#">
+                             <span id="Bot_helper">Help Bot</span>
+                         </a>
+                     </div>
+
+                 </div>
+             </div>
+         </div>
+    </div>
+<!--Tabela za user_info-->
+    <div>
+        <div class="wrapper2">
+            <div class="text_box">
+
+                <h3>Showing you how much did u spent</h3>
+
+                <h5>(this is onot real and wont be adding it if it was real)</h5>
+
+                <table>
+                    <tr>
+                        <th>User_ID</th>
+                        <th>Total Spent by User</th>
+                        <th>Year</th>
+                    </tr>
+                    {% for user in user_spending %}
+                    <tr>
+                        <td>{{ user.user_id }}</td>
+                        <td>{{ user.money_spent }}</td>
+                        <td>{{ user.year }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
