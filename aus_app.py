@@ -1,9 +1,10 @@
 ## aus_app - is Application for User Spending Analysis App
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from con_sqlalchemy import db, voucher_collection
 from models import User_info, Total
 from sqlalchemy import func
 import requests
+
 
 
 # Create the Flask app instance
@@ -20,21 +21,9 @@ db.init_app(aus_app)
 with aus_app.app_context():
     db.create_all()
 
-@aus_app.route('/total_spent', methods=['GET'])
-def get_money_spending():
-    money_spending = Total.query.all()
-    return jsonify([money.to_dict() for money in money_spending])
-
-
-@aus_app.route('/users_info', methods=['GET'])
-def get_users_info_s():
-    users_infos = User_info.query.all()
-    return jsonify([user_info.to_dict() for user_info in users_infos])
-
-
-# 2. Calculate Average Spending by Age Ranges
-@aus_app.route('/average_spending_by_age', methods=['GET'])
-def get_average_spending_by_age():
+# Route for the homepage / # 2. Calculate Average Spending by Age Ranges
+@aus_app.route('/')
+def home():
     results = db.session.query(
         func.avg(Total.money_spent).label('average_spent'), User_info.age
     ).join(User_info, Total.user_id == User_info.user_id).group_by(User_info.age).all()
@@ -65,13 +54,11 @@ def get_average_spending_by_age():
             age_ranges[">47"].append(average_spent)
 
     # Calculate the average spending for each age range
-    averages = {
-        age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()
-    }
+    averages = {age_range: sum(spends) / len(spends) if spends else 0 for age_range, spends in age_ranges.items()}
 
     # Send data to Telegram bot
-    bot_token = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'
-    chat_id = '8011204510'  # Set your desired chat ID
+    bot_token = '8164159308:AAG7mV-JfZUKSECJ7lOHC0I7dl3spZuCPqI'  # Твојот Telegram бот токен
+    chat_id = '8011204510'  # Твојот Telegram chat ID
 
     message = "Average Spending by Age Range:\n"
     for age_range, avg in averages.items():
@@ -83,12 +70,42 @@ def get_average_spending_by_age():
         'text': message,
         'parse_mode': 'Markdown'
     }
-
     # Sending the message
     requests.get(telegram_url, params=params)
 
-    # Return the averages as a JSON object
-    return jsonify(averages)
+    # Врати ја HTML страницата со податоци
+    return render_template('Home_page.html', averages=averages)
+
+
+# Route to display user information
+@aus_app.route('/users_info')
+def display_users_page():
+    # Retrieve all user info from the database
+    users_info = User_info.query.all()
+
+    # Pass the user info to the template
+    return render_template('User_info_page.html', users_info=users_info)
+
+
+# Route to display user_spendin/total_spent/totaol_money_spent
+@aus_app.route('/total_spent')
+def display_money_spent():
+    # Retrieve all money spent from user from user_spent database
+    users_spending = Total.query.all()
+
+    # Pass the user info to the template
+    return render_template('MMS_page.html', users_info=users_spending)
+
+@aus_app.route('/total_spent', methods=['GET'])
+def get_money_spending():
+    money_spending = Total.query.all()
+    return jsonify([money.to_dict() for money in money_spending])
+
+
+@aus_app.route('/users_info', methods=['GET'])
+def get_users_info_s():
+    users_infos = User_info.query.all()
+    return jsonify([user_info.to_dict() for user_info in users_infos])
 
 
 # 1. Retrieve Total Spending by User
